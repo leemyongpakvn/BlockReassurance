@@ -141,4 +141,18 @@ class PsreassuranceRepository extends ServiceEntityRepository
 
         return $result;
     }
+
+    /**
+     * @return int
+     */
+    public function getMaxPosition()
+    {
+        $qb = $this->connection->createQueryBuilder();
+        $qb
+            ->select('MAX(position) AS max')
+            ->from($this->databasePrefix . 'psreassurance')
+        ;
+
+        return (int) $qb->execute()->fetch(\PDO::FETCH_COLUMN);
+    }
 }

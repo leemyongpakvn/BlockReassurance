@@ -67,23 +67,21 @@ class AdminBlockListingController extends ModuleAdminController
     {
         $result = false;
         $idPSR = (int) Tools::getValue('idBlock');
-        $blockPSR = Db::getInstance()->getRow('SELECT * FROM ' . _DB_PREFIX_ . 'psreassurance WHERE `id_psreassurance` = ' . (int) $idPSR);
-        if (!empty($blockPSR)) {
+        $reassuranceRepository = $this->context->controller->getContainer()->get('block_reassurance_repository');
+        $blockPSR = $reassuranceRepository->find($idPSR);
+        if ($blockPSR !== null) {
             $result = true;
             // Remove Custom icon
-            if (!empty($blockPSR['custom_icon'])) {
-                $filePath = _PS_ROOT_DIR_ . $this->module->img_path_perso . '/' . basename($blockPSR['custom_icon']);
+            if (!empty($blockPSR->getCustomIcon())) {
+                $filePath = _PS_ROOT_DIR_ . $this->module->img_path_perso . '/' . basename($blockPSR->getCustomIcon());
                 if (file_exists($filePath)) {
                     $result = unlink($filePath);
                 }
             }
-            // Remove Block Translations
+
+            // Remove Block, translation is cascade removed
             if ($result) {
-                $result = Db::getInstance()->delete('psreassurance_lang', 'id_psreassurance = ' . (int) $idPSR);
-            }
-            // Remove Block
-            if ($result) {
-                $result = Db::getInstance()->delete('psreassurance', 'id_psreassurance = ' . (int) $idPSR);
+                $reassuranceRepository->delete($blockPSR);
             }
         }
 
@@ -161,9 +159,7 @@ class AdminBlockListingController extends ModuleAdminController
             $blockPsr = $reassuranceRepository->find($id_block);
         } else {
             $blockPsr = new Psreassurance();
-            // Last position
-            $blockPsr->setPosition((int) Db::getInstance()->getValue('SELECT MAX(position) AS max FROM ' . _DB_PREFIX_ . 'psreassurance'));
-            $blockPsr->setPosition($blockPsr->getPosition() ? $blockPsr->getPosition() + 1 : 1);
+            $blockPsr->setPosition($reassuranceRepository->getMaxPosition() + 1);
             $blockPsr->setStatus(0);
         }
 
@@ -219,6 +215,7 @@ class AdminBlockListingController extends ModuleAdminController
     {
         $blocks = Tools::getValue('blocks');
         $result = false;
+        $reassuranceFormHandler = $this->context->controller->getContainer()->get('block_reassurance_form_data_handler');
 
         if (!empty($blocks) && is_array($blocks)) {
             $updateResult = true;

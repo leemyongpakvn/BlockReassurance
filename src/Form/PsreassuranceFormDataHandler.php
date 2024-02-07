@@ -72,6 +72,32 @@ class PsreassuranceFormDataHandler implements FormDataHandlerInterface
      */
     public function update($id, array $data)
     {
+        $psreassurance = $this->psreassuranceRepository->find($id);
+        
+        if ($psreassurance === null) {
+            return 0;
+        } else {
+            foreach ($data as $key => $value) {
+                switch ($key) {
+                    case 'date_upd':
+                        $psreassurance->setDateUpd($value);
+                        break;
+                    case 'position':
+                        $psreassurance->setPosition($value);
+                        break;
+                    case 'status':
+                        $psreassurance->setStatus($value);
+                        break;
+                }
+            }
+            
+            $this->entityManager->persist($psreassurance);
+            $this->entityManager->flush();
+        
+            //file_put_contents('tangiaba', $data['status'] . ' || ' . $psreassurance->getStatus());
+
+            return 1;
+        }
     }
 
     /**
