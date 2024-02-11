@@ -11,6 +11,8 @@
 
 Connect with your visitors and reassure them about secure payment, free shipping or returns.
 
+This is my last commit on this repo. My sibling @leemyongpakva will continue my Code-Of-PS works :)
+
 ## Compatibility
 
 PrestaShop: `1.7.7.0` or later
